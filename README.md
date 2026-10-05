@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Coins Balance - 1 Bilhão</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        tiktokDark: '#010101',
+                        tiktokCard: '#121212',
+                        tiktokElevated: '#1E1E24',
+                        tiktokBorder: '#2F2F38',
+                        tiktokPink: '#FE2C55',
+                        tiktokCyan: '#25F4EE',
+                        tiktokGold: '#FFC700',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050507;
+            color: #ffffff;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* Glow effects */
+        .pink-glow { box-shadow: 0 0 25px rgba(254, 44, 85, 0.4); }
+        .cyan-glow { box-shadow: 0 0 25px rgba(37, 244, 238, 0.4); }
+        .gold-glow { box-shadow: 0 0 30px rgba(255, 199, 0, 0.35); }
+
+        /* Floating Coin Animation */
+        @keyframes floatCoin {
+            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+            50% { transform: translateY(-10px) rotate(12deg) scale(1.05); }
+        }
+        .animate-coin {
+            animation: floatCoin 2.5s ease-in-out infinite;
+        }
+
+        /* Coin Floating Particle Animation */
+        .coin-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            animation: flyCoin 1.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes flyCoin {
+            0% {
+                opacity: 1;
+                transform: scale(0.4) translate(0, 0) rotate(0deg);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1.4) translate(var(--tw-tx, 0), var(--tw-ty, -120px)) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.6) translate(var(--tw-tx, 0), var(--tw-ty, -250px)) rotate(360deg);
+            }
+        }
+
+        /* Gift Gift Banner Popup */
+        @keyframes giftPop {
+            0% { transform: scale(0.5) translateY(50px); opacity: 0; }
+            50% { transform: scale(1.1) translateY(-10px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .animate-gift-pop {
+            animation: giftPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #121212; }
+        ::-webkit-scrollbar-thumb { background: #2F2F38; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FE2C55; }
+
+        .gift-badge {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .gift-badge:active { transform: scale(0.92); }
+        .gift-badge.selected {
+            border-color: #FE2C55;
+            background-color: rgba(254, 44, 85, 0.15);
+            box-shadow: 0 0 18px rgba(254, 44, 85, 0.4);
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 bg-black">
+
+    <!-- App Main Frame Container -->
+    <div id="appContainer" class="w-full max-w-md h-screen sm:h-[900px] bg-tiktokDark sm:rounded-[40px] border-0 sm:border-[8px] border-tiktokBorder shadow-2xl flex flex-col overflow-hidden relative">
+
+        <!-- Header -->
+        <header class="px-5 py-4 bg-tiktokCard/90 backdrop-blur-md border-b border-tiktokBorder flex items-center justify-between z-30 sticky top-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-tiktokPink via-rose-500 to-tiktokCyan p-[2px] flex items-center justify-center shadow-lg">
+                    <div class="w-full h-full bg-black rounded-full flex items-center justify-center">
+                        <i class="fa-brands fa-tiktok text-white text-xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-sm font-black tracking-wide text-white uppercase leading-none flex items-center gap-1.5">
+                        TikTok Coins
+                        <span class="text-[9px] bg-tiktokPink/20 text-tiktokPink border border-tiktokPink/40 px-1.5 py-0.5 rounded-full">VIP</span>
+                    </h1>
+                    <span class="text-[10px] text-gray-400 font-semibold tracking-wider">BALANCE MANAGER</span>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSound()" id="soundBtn" class="w-9 h-9 rounded-full bg-tiktokElevated border border-tiktokBorder flex items-center justify-center text-gray-300 hover:text-white transition" title="Ativar/Desativar Som">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-xs text-tiktokCyan"></i>
+                </button>
+                <button onclick="openRechargeModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-tiktokPink to-rose-600 hover:opacity-90 active:scale-95 text-white text-xs font-extrabold px-3 py-2 rounded-full shadow-lg transition pink-glow">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Recarregar</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Main View -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+            <!-- Card 1: 1 Billion Coin Balance Display -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-tiktokElevated via-tiktokCard to-black border border-tiktokBorder p-5 shadow-2xl gold-glow">
+                <div class="absolute -right-10 -top-10 w-36 h-36 bg-tiktokGold/15 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -bottom-10 w-36 h-36 bg-tiktokPink/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-tiktokCyan animate-ping"></span>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Saldo Atual</p>
+                        </div>
+                        
+                        <!-- 1 Billion Coins Highlight -->
+                        <div class="flex items-baseline gap-1.5 mt-2">
+                            <span id="balanceDisplay" class="text-3xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">1.000.000.000</span>
+                        </div>
+                        <p class="text-[11px] font-extrabold text-tiktokGold uppercase tracking-wider mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-coins text-xs"></i> 1 BILHÃO DE MOEDAS TIKTOK
+                        </p>
+                    </div>
+
+                    <div class="w-16 h-16 rounded-2xl bg-tiktokGold/10 border border-tiktokGold/30 flex items-center justify-center shadow-inner relative">
+                        <i class="fa-solid fa-coins text-4xl text-tiktokGold animate-coin"></i>
+                    </div>
+                </div>
+
+                <!-- Quick Action Bar -->
+                <div class="mt-4 pt-3 border-t border-tiktokBorder/60 flex gap-2">
+                    <button onclick="openRechargeModal()" class="flex-1 bg-tiktokGold/10 hover:bg-tiktokGold/20 border border-tiktokGold/30 text-tiktokGold text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-vault text-xs"></i>
+                        Adicionar +Bilhões
+                    </button>
+                    <button onclick="quickSelectTopCreator()" class="flex-1 bg-tiktokElevated hover:bg-tiktokBorder text-gray-300 text-xs font-semibold py-2.5 rounded-xl transition border border-tiktokBorder flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-user text-tiktokCyan text-xs"></i>
+                        Sugestão @criador
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Send Coins Form -->
+            <div class="bg-tiktokCard rounded-3xl border border-tiktokBorder p-4.5 shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-gray-200 flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-tiktokPink"></i>
+                        Enviar Presentes & Moedas
+                    </h2>
+                    <span class="text-[10px] text-tiktokCyan font-bold bg-tiktokCyan/10 px-2.5 py-0.5 rounded-full border border-tiktokCyan/20">Envio Instantâneo</span>
+                </div>
+
+                <!-- Recipient Input -->
+                <div class="space-y-1.5">
+                    <label class="block text-[11px] font-semibold text-gray-300">Destinatário</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3.5 text-tiktokPink font-extrabold text-sm">@</span>
+                        <input type="text" id="usernameInput" placeholder="usuario_exemplo" autocomplete="off" value="usuario"
+                            class="w-full bg-tiktokDark text-white text-xs font-bold rounded-2xl pl-8 pr-10 py-3.5 border border-tiktokBorder focus:outline-none focus:border-tiktokPink focus:ring-1 focus:ring-tiktokPink transition placeholder-gray-600">
+                        <div id="validUserCheck" class="absolute right-3.5">
+                            <i class="fa-solid fa-circle-check text-tiktokCyan text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gift Presets Grid -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-[11px] font-semibold text-gray-300">Presentes Oficiais TikTok</label>
+                        <span class="text-[10px] text-gray-500">Toque para selecionar</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <!-- Preset 1: Rosa -->
+                        <button type="button" onclick="selectGiftPreset(1, 'Rosa', '🌹', event)" class="gift-badge border border-tiktokBorder bg-tiktokDark rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1">
+                            <span class="text-2xl">🌹</span>
+                            <span class="text-[11px] font-bold text-white leading-none">Rosa</span>
+                            <span class="text-[10px] font-bold text-tiktokGold flex items-center gap-1">
+                                <i class="fa-solid fa-coins text-[8px]"></i> 1
+                            </span>
+                        </button>
+
+                        <!-- Preset 2: Dedo Indicador -->
+                        <button type="button" onclick="selectGiftPreset(5, 'Indicador', '👆', event)" class="gift-badge border border-tiktokBorder bg-tiktokDark rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1">
+                            <span class="text-2xl">👆</span>
+                            <span class="text-[11px] font-bold text-white leading-none">Indicador</span>
+                            <span class="text-[10px] font-bold text-tiktokGold flex items-center gap-1">
+                                <i class="fa-solid fa-coins text-[8px]"></i> 5
+                            </span>
+                        </button>
+
+                        <!-- Preset 3: Pandinha -->
+                        <button type="button" onclick="selectGiftPreset(99, 'Pandinha', '🐼', event)" class="gift-badge border border-tiktokBorder bg-tiktokDark rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1">
+                            <span class="text-2xl">🐼</span>
+                            <span class="text-[11px] font-bold text-white leading-none">Pandinha</span>
+                            <span class="text-[10px] font-bold text-tiktokGold flex items-center gap-1">
+                                <i class="fa-solid fa-coins text-[8px]"></i> 99
+                            </span>
+                        </button>
+
+                        <!-- Preset 4: Óculos -->
+                        <button type="button" onclick="selectGiftPreset(199, 'Óculos VR', '🕶️', event)" class="gift-badge border border-tiktokBorder bg-tiktokDark rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1">
+                            <span class="text-2xl">🕶️</span>
+                            <span class="text-[11px] font-bold text-white leading-none">Óculos VR</span>
+                            <span class="text-[10px] font-bold text-tiktokGold flex items-center gap-1">
+                                <i class="fa-solid fa-coins text-[8px]"></i> 199
+                            </span>
+                        </button>
+
+                        <!-- Preset 5: Leão -->
+                        <button type="button" onclick="selectGiftPreset(29999, 'Leão TikTok', '🦁', event)" class="gift-badge border border-tiktokBorder bg-tiktokDark rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1">
+                            <span class="text-2xl">🦁</span>
+                            <span class="text-[11px] font-bold text-white leading-none">Leão</span>
+                            <span class="text-[10px] font-bold text-tiktokGold flex items-center gap-1">
+                                <i class="fa-solid fa-coins text-[8px]"></i> 29.999
+                            </span>
+                        </button>
+
+                        <!-- Preset 6: Universo -->
+                        <button type="button" onclick="selectGiftPreset(34999, 'Universo', '🌌', event)" class="gift-badge border border-tiktokBorder bg-tiktokDark rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1">
+                            <span class="text-2xl">🌌</span>
+                            <span class="text-[11px] font-bold text-white leading-none">Universo</span>
+                            <span class="text-[10px] font-bold text-tiktokGold flex items-center gap-1">
+                                <i class="fa-solid fa-coins text-[8px]"></i> 34.999
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Coin Amount -->
+                <div class="space-y-1.5">
+                    <label class="block text-[11px] font-semibold text-gray-300">Ou digite um valor personalizado</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-coins absolute left-3.5 text-tiktokGold text-xs"></i>
+                        <input type="number" id="customAmountInput" placeholder="Quantidade de moedas" min="1"
+                            class="w-full bg-tiktokDark text-white text-xs font-bold rounded-2xl pl-9 pr-4 py-3.5 border border-tiktokBorder focus:outline-none focus:border-tiktokGold focus:ring-1 focus:ring-tiktokGold transition placeholder-gray-600">
+                    </div>
+                </div>
+
+                <!-- Send Button -->
+                <button id="sendBtn" onclick="handleSendCoins(event)" class="w-full bg-gradient-to-r from-tiktokPink via-rose-600 to-tiktokPink hover:opacity-95 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-xl pink-glow active:scale-[0.98] transition duration-150 flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Enviar Para @<span id="targetBtnUser">usuario</span></span>
+                </button>
+            </div>
+
+            <!-- Card 3: Transaction History -->
+            <div class="bg-tiktokCard rounded-3xl border border-tiktokBorder p-4.5 shadow-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-tiktokCyan text-xs"></i>
+                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-gray-200">Histórico de Envios</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="historyCounter" class="text-[10px] bg-tiktokDark text-gray-400 px-2 py-0.5 rounded-full font-bold border border-tiktokBorder">0</span>
+                        <button onclick="clearHistory()" class="text-[10px] text-gray-500 hover:text-tiktokPink transition" title="Limpar Histórico">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transaction List -->
+                <div id="historyList" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                    <div id="emptyHistory" class="text-center py-6 text-gray-500 text-xs italic">
+                        Nenhum envio realizado ainda.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- App Footer -->
+        <footer class="p-3 bg-tiktokCard border-t border-tiktokBorder text-center text-[10px] text-gray-500">
+            TikTok Coins Balance • Versão VIP (1B Moedas)
+        </footer>
+    </div>
+
+    <!-- Recharge Modal -->
+    <div id="rechargeModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-tiktokCard border border-tiktokBorder rounded-3xl w-full max-w-sm p-6 space-y-5 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            
+            <button onclick="closeRechargeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-tiktokDark border border-tiktokBorder flex items-center justify-center text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="text-center space-y-1">
+                <div class="w-14 h-14 bg-tiktokGold/10 rounded-2xl flex items-center justify-center mx-auto mb-2 text-tiktokGold text-3xl border border-tiktokGold/30">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <h3 class="text-base font-extrabold text-white">Recarregar Cofre VIP</h3>
+                <p class="text-xs text-gray-400">Adicione bilhões de moedas ao seu saldo instantaneamente</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="addCoins(100000000)" class="border border-tiktokBorder hover:border-tiktokGold/50 bg-tiktokDark hover:bg-tiktokDark/80 rounded-2xl p-3 text-center transition group">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase">Pacote Básico</div>
+                    <div class="text-xs font-black text-tiktokGold group-hover:scale-105 transition mt-0.5">+100 Milhões</div>
+                    <div class="text-[10px] text-tiktokCyan mt-1">Grátis</div>
+                </button>
+
+                <button onclick="addCoins(500000000)" class="border border-tiktokBorder hover:border-tiktokGold/50 bg-tiktokDark hover:bg-tiktokDark/80 rounded-2xl p-3 text-center transition group">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase">Meio Bilhão</div>
+                    <div class="text-xs font-black text-tiktokGold group-hover:scale-105 transition mt-0.5">+500 Milhões</div>
+                    <div class="text-[10px] text-tiktokCyan mt-1">Grátis</div>
+                </button>
+
+                <button onclick="addCoins(1000000000)" class="border border-tiktokBorder hover:border-tiktokGold/50 bg-tiktokDark hover:bg-tiktokDark/80 rounded-2xl p-3 text-center transition group">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase">Super Bilhão</div>
+                    <div class="text-xs font-black text-tiktokGold group-hover:scale-105 transition mt-0.5">+1 Bilhão</div>
+                    <div class="text-[10px] text-tiktokCyan mt-1">Grátis</div>
+                </button>
+
+                <button onclick="addCoins(5000000000)" class="border border-tiktokBorder hover:border-tiktokGold/50 bg-tiktokDark hover:bg-tiktokDark/80 rounded-2xl p-3 text-center transition group">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase">Modo Whales</div>
+                    <div class="text-xs font-black text-tiktokGold group-hover:scale-105 transition mt-0.5">+5 Bilhões</div>
+                    <div class="text-[10px] text-tiktokCyan mt-1">Grátis</div>
+                </button>
+            </div>
+
+            <button onclick="addCoins(10000000000)" class="w-full py-3.5 bg-gradient-to-r from-tiktokGold to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-extrabold rounded-2xl transition shadow-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                <i class="fa-solid fa-crown text-sm"></i>
+                +10 BILHÕES DE MOEDAS BÔNUS
+            </button>
+        </div>
+    </div>
+
+    <!-- Animated Gift Announcement Overlay -->
+    <div id="giftBannerOverlay" class="fixed inset-0 pointer-events-none z-50 flex items-center justify-center p-4 hidden">
+        <div id="giftBannerCard" class="bg-tiktokCard/95 border-2 border-tiktokPink rounded-3xl p-6 shadow-2xl text-center max-w-xs space-y-3 pink-glow animate-gift-pop">
+            <div id="giftBannerIcon" class="text-6xl animate-bounce">🦁</div>
+            <div>
+                <h4 class="text-base font-black text-white" id="giftBannerTitle">Presente Enviado!</h4>
+                <p class="text-xs text-tiktokCyan font-bold mt-1" id="giftBannerDetail">Você enviou Leão para @usuario</p>
+                <div class="mt-2 inline-block bg-tiktokGold/20 border border-tiktokGold/40 px-3 py-1 rounded-full text-tiktokGold font-black text-xs" id="giftBannerCost">
+                    29.999 Moedas
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Banner -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 w-11/12 max-w-sm bg-tiktokCard border border-tiktokBorder text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none z-50">
+        <div id="toastIcon" class="text-base shrink-0"></div>
+        <div id="toastMessage" class="text-xs font-semibold"></div>
+    </div>
+
+    <script>
+        // App State Variables (1 Billion Coins Initial Balance)
+        let balance = 1000000000;
+        let selectedGift = null;
+        let historyRecords = [];
+        let soundEnabled = true;
+
+        // Web Audio API Sound Generator
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playCoinSound() {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); // B5
+                osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.15); // E6
+
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch (e) {}
+        }
+
+        function playSpecialGiftSound() {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(554.37, now + 0.1);
+                osc.frequency.setValueAtTime(659.25, now + 0.2);
+                osc.frequency.setValueAtTime(880, now + 0.3);
+
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(now + 0.6);
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-xs text-tiktokCyan';
+                showToast('Efeitos sonoros ativados', 'info');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-xs text-gray-500';
+                showToast('Efeitos sonoros desativados', 'info');
+            }
+        }
+
+        // DOM Elements
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const usernameInput = document.getElementById('usernameInput');
+        const customAmountInput = document.getElementById('customAmountInput');
+        const validUserCheck = document.getElementById('validUserCheck');
+        const targetBtnUser = document.getElementById('targetBtnUser');
+        const historyList = document.getElementById('historyList');
+        const emptyHistory = document.getElementById('emptyHistory');
+        const historyCounter = document.getElementById('historyCounter');
+        const rechargeModal = document.getElementById('rechargeModal');
+
+        // Target user input listener
+        usernameInput.addEventListener('input', (e) => {
+            let val = e.target.value.trim();
+            if (val.startsWith('@')) {
+                val = val.substring(1);
+            }
+            e.target.value = val;
+
+            if (val.length >= 1) {
+                validUserCheck.classList.remove('hidden');
+                targetBtnUser.textContent = val;
+            } else {
+                validUserCheck.classList.add('hidden');
+                targetBtnUser.textContent = 'usuario';
+            }
+        });
+
+        customAmountInput.addEventListener('input', () => {
+            if (customAmountInput.value) {
+                clearGiftPresets();
+            }
+        });
+
+        function selectGiftPreset(amount, name, icon, event) {
+            selectedGift = { amount, name, icon };
+            customAmountInput.value = '';
+            
+            const cards = document.querySelectorAll('.gift-badge');
+            cards.forEach(card => card.classList.remove('selected'));
+            
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('selected');
+            }
+            playCoinSound();
+        }
+
+        function clearGiftPresets() {
+            selectedGift = null;
+            const cards = document.querySelectorAll('.gift-badge');
+            cards.forEach(card => card.classList.remove('selected'));
+        }
+
+        function quickSelectTopCreator() {
+            const creators = ['neymar_jr', 'virginia_fonseca', 'tiktok_br', 'luva_de_pedreiro', 'carlinhos_maia'];
+            const random = creators[Math.floor(Math.random() * creators.length)];
+            usernameInput.value = random;
+            targetBtnUser.textContent = random;
+            validUserCheck.classList.remove('hidden');
+            showToast(`Criador selecionado: @${random}`, 'info');
+            playCoinSound();
+        }
+
+        function handleSendCoins(event) {
+            const rawUser = usernameInput.value.trim();
+            const recipient = rawUser ? `@${rawUser}` : '@usuario';
+
+            if (!rawUser || rawUser.length < 1) {
+                showToast('Por favor, informe o @usuário de destino!', 'error');
+                return;
+            }
+
+            let amountToSend = 0;
+            let giftLabel = 'Moedas';
+            let giftIcon = '🪙';
+
+            if (selectedGift) {
+                amountToSend = selectedGift.amount;
+                giftLabel = selectedGift.name;
+                giftIcon = selectedGift.icon;
+            } else if (customAmountInput.value) {
+                amountToSend = parseInt(customAmountInput.value, 10);
+            }
+
+            if (isNaN(amountToSend) || amountToSend <= 0) {
+                showToast('Escolha um presente ou insira a quantidade de moedas!', 'error');
+                return;
+            }
+
+            if (amountToSend > balance) {
+                showToast('Saldo insuficiente para esta transferência!', 'error');
+                openRechargeModal();
+                return;
+            }
+
+            // Deduct Balance
+            balance -= amountToSend;
+            updateBalanceUI();
+
+            // FX
+            spawnCoinParticles(event);
+            triggerConfetti();
+
+            if (amountToSend >= 1000) {
+                playSpecialGiftSound();
+                showGiftBanner(giftIcon, giftLabel, recipient, amountToSend);
+            } else {
+                playCoinSound();
+            }
+
+            // Save Transaction History
+            addHistoryRecord(recipient, amountToSend, giftLabel, giftIcon);
+
+            showToast(`Enviado ${amountToSend.toLocaleString('pt-BR')} moedas para ${recipient}!`, 'success');
+
+            customAmountInput.value = '';
+            clearGiftPresets();
+        }
+
+        function showGiftBanner(icon, giftName, recipient, cost) {
+            const overlay = document.getElementById('giftBannerOverlay');
+            document.getElementById('giftBannerIcon').textContent = icon;
+            document.getElementById('giftBannerTitle').textContent = `Presente ${giftName}!`;
+            document.getElementById('giftBannerDetail').textContent = `Você enviou para ${recipient}`;
+            document.getElementById('giftBannerCost').textContent = `${cost.toLocaleString('pt-BR')} Moedas`;
+
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 2000);
+        }
+
+        function spawnCoinParticles(e) {
+            const clickX = e && e.clientX ? e.clientX : window.innerWidth / 2;
+            const clickY = e && e.clientY ? e.clientY : window.innerHeight / 2;
+
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'coin-particle text-2xl';
+                particle.innerHTML = selectedGift ? selectedGift.icon : '🪙';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 90 + Math.random() * 140;
+                const tx = Math.cos(angle) * distance + 'px';
+                const ty = Math.sin(angle) * distance - 100 + 'px';
+
+                particle.style.left = `${clickX}px`;
+                particle.style.top = `${clickY}px`;
+                particle.style.setProperty('--tw-tx', tx);
+                particle.style.setProperty('--tw-ty', ty);
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 1300);
+            }
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.6 },
+                    colors: ['#FE2C55', '#25F4EE', '#FFC700']
+                });
+            }
+        }
+
+        function updateBalanceUI() {
+            balanceDisplay.textContent = balance.toLocaleString('pt-BR');
+        }
+
+        function openRechargeModal() {
+            rechargeModal.classList.remove('hidden');
+            playCoinSound();
+        }
+
+        function closeRechargeModal() {
+            rechargeModal.classList.add('hidden');
+        }
+
+        function addCoins(amount) {
+            balance += amount;
+            updateBalanceUI();
+            closeRechargeModal();
+            triggerConfetti();
+            playSpecialGiftSound();
+
+            addHistoryRecord('Cofre VIP', amount, 'Recarga', '⚡', true);
+            showToast(`Sucesso! +${amount.toLocaleString('pt-BR')} moedas adicionadas ao seu saldo.`, 'success');
+        }
+
+        function addHistoryRecord(target, amount, label, icon, isRecharge = false) {
+            const record = {
+                id: Date.now(),
+                isRecharge,
+                target,
+                amount,
+                label,
+                icon,
+                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            historyRecords.unshift(record);
+            renderHistory();
+        }
+
+        function clearHistory() {
+            if (historyRecords.length === 0) return;
+            historyRecords = [];
+            renderHistory();
+            showToast('Histórico zerado com sucesso.', 'info');
+        }
+
+        function renderHistory() {
+            historyCounter.textContent = historyRecords.length;
+
+            if (historyRecords.length === 0) {
+                emptyHistory.style.display = 'block';
+                historyList.innerHTML = '';
+                historyList.appendChild(emptyHistory);
+                return;
+            }
+
+            emptyHistory.style.display = 'none';
+
+            historyList.innerHTML = historyRecords.map(item => `
+                <div class="flex items-center justify-between bg-tiktokDark border border-tiktokBorder p-3 rounded-2xl text-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full ${item.isRecharge ? 'bg-tiktokGold/20 text-tiktokGold' : 'bg-tiktokPink/20 text-tiktokPink'} flex items-center justify-center font-bold text-base shrink-0">
+                            ${item.icon}
+                        </div>
+                        <div>
+                            <div class="font-extrabold text-white text-xs">${item.target}</div>
+                            <div class="text-gray-500 text-[10px]">${item.label} • ${item.time}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-black ${item.isRecharge ? 'text-tiktokCyan' : 'text-tiktokPink'} text-xs">
+                            ${item.isRecharge ? '+' : '-'}${item.amount.toLocaleString('pt-BR')} 🪙
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-check text-tiktokCyan"></i>';
+                toast.style.borderColor = '#25F4EE';
+            } else if (type === 'error') {
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-tiktokPink"></i>';
+                toast.style.borderColor = '#FE2C55';
+            } else {
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-info text-tiktokGold"></i>';
+                toast.style.borderColor = '#FFC700';
+            }
+
+            toast.classList.remove('-translate-y-24', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('-translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initialize UI
+        updateBalanceUI();
+    </script>
+</body>
+</html>
