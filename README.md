@@ -740,6 +740,29 @@
 
         // Initialize UI
         updateBalanceUI();
+
+        const { TikTokConnectionWrapper } = require('tiktok-live-connector');
+
+// Subsitua pelo nome de usuário que está ao vivo
+let tiktokUsername = "woman.xsy";
+
+let tiktokLiveConnection = new TikTokConnectionWrapper(tiktokUsername);
+
+// Conecta à live
+tiktokLiveConnection.connect().then(state => {
+    console.log(`Conectado à live de ${state.roomId}`);
+}).catch(err => {
+    console.error('Erro ao conectar:', err);
+});
+
+// Evento disparado quando alguém envia um Presente (Moedas)
+tiktokLiveConnection.on('gift', data => {
+    // data.giftId: ID do presente
+    // data.repeatCount: Quantidade enviada
+    // data.diamondCount: Valor aproximado em moedas/diamantes
+    console.log(`${data.uniqueId} enviou o presente ${data.giftName} x${data.repeatCount}!`);
+});
+
     </script>
 </body>
 </html>
