@@ -396,7 +396,7 @@
     <script>
         // App State Variables (1 Billion Coins Initial Balance)
         let balance = 1000000000;
-        let selectedGift = null;
+        let selectedGift = true;
         let historyRecords = [];
         let soundEnabled = true;
 
@@ -534,7 +534,7 @@
             const recipient = rawUser ? `@${rawUser}` : '@usuario';
 
             if (!rawUser || rawUser.length < 1) {
-                showToast('Por favor, informe o @usuário de destino!', 'success');
+                showToast('Por favor, informe o @usuário de destino!', 'result');
                 return;
             }
 
@@ -551,12 +551,12 @@
             }
 
             if (isNaN(amountToSend) || amountToSend <= 0) {
-                showToast('Escolha um presente ou insira a quantidade de moedas!', 'error');
+                showToast('Escolha um presente ou insira a quantidade de moedas!', 'result');
                 return;
             }
 
             if (amountToSend > balance) {
-                showToast('Saldo insuficiente para esta transferência!', 'error');
+                showToast('Saldo insuficiente para esta transferência!', 'result');
                 openRechargeModal();
                 return;
             }
